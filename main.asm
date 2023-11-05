@@ -10,6 +10,8 @@ extern glfwInit, glfwTerminate, glfwCreateWindow, glfwSwapBuffers, glfwPollEvent
 
 extern printf, exit
 
+extern stbi_load
+
 %define GL_ARRAY_BUFFER 34962
 %define GL_STATIC_DRAW 35044
 %define GL_DOUBLE 5130
@@ -172,6 +174,8 @@ loop:
     call glfwSwapBuffers
     call glfwPollEvents
 
+
+
     mov rdi, [window]
     call glfwWindowShouldClose
     cmp rax, 0
@@ -191,6 +195,10 @@ section .bss
     fshader: resb 4
     program: resb 4
     status: resb 4
+    image: resb 8
+    w: resb 4
+    h: resb 4
+    c: resb 4
 
 section .rodata
     int_format: db "%d", 10, 0
