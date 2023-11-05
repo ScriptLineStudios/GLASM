@@ -152,6 +152,24 @@ glgarbage:
     mov rdi, [program]
     call [glad_glUseProgram]
 
+
+
+    ; stb image loading
+    mov rdi, imgpath
+    mov rsi, w
+    mov rdx, h
+    mov rcx, c
+    mov r8, 0
+    call stbi_load
+
+    mov rdi, pf
+    mov rsi, [w]
+    mov rdx, [h]
+    mov rcx, [c]
+    call printf
+
+
+
 loop:
     movd xmm0, [zero]
     movd xmm1, [r]
@@ -199,7 +217,6 @@ section .bss
     w: resb 4
     h: resb 4
     c: resb 4
-    png: resb 8
 
 section .rodata
     int_format: db "%d", 10, 0
@@ -208,6 +225,8 @@ section .rodata
     string_format: db "%s", 10, 0
     title: db "Hello, world!", 0
     error: db "Failed to load gl functions!", 10
+    imgpath: db "test.png", 0
+    pf: db "w: %d, h: %d, c: %d\n", 0
     len equ $ - error
     r: dd 0.1
     test: dq 0.2
