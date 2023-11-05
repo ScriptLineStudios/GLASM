@@ -199,6 +199,7 @@ section .bss
     w: resb 4
     h: resb 4
     c: resb 4
+    png: resb 8
 
 section .rodata
     int_format: db "%d", 10, 0
