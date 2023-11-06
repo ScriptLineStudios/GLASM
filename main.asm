@@ -231,7 +231,7 @@ glgarbage:
 loop:
     movd xmm0, [zero]
     movd xmm1, [r]
-    movd xmm2, [zero]
+    movd xmm2, [r]
     movd xmm3, [r]
     call [glad_glClearColor]
     
@@ -317,7 +317,7 @@ section .rodata
     imgpath: db "assets/test.png", 0
     pf: db "w: %d, h: %d, c: %d", 10, 0
     len equ $ - error
-    r: dd 1.0
+    r: dd 0.1
     test: dq 0.2
     zero: dq 0.0
 
