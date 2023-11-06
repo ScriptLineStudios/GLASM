@@ -79,7 +79,7 @@ main:
     call glfwInit
 
     ; //Given the arguments in left-to-right order, the order of registers used is: %rdi, %rsi, %rdx, %rcx, %r8, and %r9
-    mov rdi, 800
+    mov rdi, 1000
     mov rsi, 800
     mov rdx, title
     call glfwCreateWindow   
