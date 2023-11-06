@@ -24,6 +24,7 @@ extern stbi_load, stbi_image_free
 
 create_tex:
     push rbp
+    mov rbp, rsp
 
     mov rdi, 1
     mov rsi, tex
@@ -59,14 +60,16 @@ create_tex:
     mov rcx, 1000
     mov r8, 1000
     mov r9, 0
-    push GL_RGBA
-    push GL_UNSIGNED_BYTE
-    push image
+
+    sub rsp, 8
+    push qword [image] ; 8 bytes
+    push GL_UNSIGNED_BYTE ; 4 bytes
+    push GL_RGBA ; 4 bytes
     call [glad_glTexImage2D]
+    add rsp, 32
 
     pop rbp
     ret
-
 
 main:
     push rbp
@@ -217,6 +220,10 @@ glgarbage:
     mov rcx, [c]
     call printf
 
+    ; mov rdi, pointer_format
+    ; mov rsi, rsp
+    ; call printf
+    
     call create_tex
 
 loop:
