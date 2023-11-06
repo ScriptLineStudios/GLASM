@@ -75,7 +75,7 @@ create_tex:
 
 main:
     push rbp
-    
+
     call glfwInit
 
     ; //Given the arguments in left-to-right order, the order of registers used is: %rdi, %rsi, %rdx, %rcx, %r8, and %r9
@@ -227,6 +227,28 @@ glgarbage:
     ; call printf
     
     call create_tex
+    jmp loop
+
+
+;; takes in an xy/uv and pushes it to the buffer
+push_vertex:
+    push rbp
+    mov rbp, rsp
+
+    mov rax, [draw_vertex_elements]
+
+    movsd [entity_vertices + (rax*8)], xmm0
+    inc rax
+    movsd [entity_vertices + (rax*8)], xmm1
+    inc rax
+    movsd [entity_vertices + (rax*8)], xmm2
+    inc rax
+    movsd [entity_vertices + (rax*8)], xmm2
+    inc rax
+
+    mov [draw_vertex_elements], rax
+    pop rbp
+    ret
 
 loop:
     movd xmm0, [zero]
@@ -246,6 +268,36 @@ loop:
     mov rdx, 6
     call [glad_glDrawArrays]
 
+    mov r15, 0
+
+handle_entites:
+    ;; offset calculations
+    mov rax, r15
+    mov rcx, 2
+    mul rcx
+
+    ;; position
+    movsd xmm0, [entities + ((rax + 0) * 8)]
+    movsd xmm1, [entities + ((rax + 1) * 8)]    
+
+    mov xmm0, xmm0
+    mov xmm1, xmm1
+    mov xmm2, __float32__(0.0)
+    mov xmm3, __float32__(1.0)
+    call push_vertex
+
+    ;; printing
+    mov rdi, entity_debug
+    mov rsi, r15 
+    mov rax, 2
+    call printf
+
+    ;; comparison
+    inc r15
+    cmp r15, [num_entities]
+    jl handle_entites
+;; handle_entites END
+
     mov rdi, [window]
     call glfwSwapBuffers
     call glfwPollEvents
@@ -257,7 +309,7 @@ loop:
     je handle_a_end
 
 handle_a_start:
-    push __float32__(0.01)
+    push __float32__(-0.01)
     cvtss2sd xmm0, [rsp]
     movsd xmm1, [vertices] 
     addsd xmm0, xmm1
@@ -266,6 +318,7 @@ handle_a_start:
     movsd [number], xmm0
     movsd xmm0, [number]
     movsd [vertices], xmm0
+    movsd [vertices + 12 * 8], xmm0
 
     mov rdi, GL_ARRAY_BUFFER
     mov rsi, [vbo]
@@ -303,17 +356,26 @@ section .bss
     h: resb 4
     c: resb 4
     tex: resb 4
+    entity_vertices: resb 384
 
 section .data
     vertices: dq -0.5, -0.5, 0.0, 0.0,   0.5, 0.5, 1.0, 1.0,    0.5, -0.5, 1.0, 0.0,   -0.5, -0.5, 0.0, 0.0,   0.5, 0.5, 1.0, 1.0,  -0.5, 0.5, 0.0, 1.0
+    vertices2: dq -0.1, -0.1, 0.0, 0.0,   0.1, 0.1, 1.0, 1.0,    0.1, -0.1, 1.0, 0.0,   -0.1, -0.1, 0.0, 0.0,   0.1, 0.1, 1.0, 1.0,  -0.1, 0.1, 0.0, 1.0
+
+    entities: dq 0.0, 0.0, 0.5, 0.6
+
+    num_entities: db 2
+    draw_vertices: db 0
+    draw_vertex_elements: db 0
 
 section .rodata
+    entity_debug: db "handling entity: %d position of entity is %f %f", 10, 0
     int_format: db "%d", 10, 0
     float_format: db "%f", 10, 0
     pointer_format: db "%p", 10, 0
     string_format: db "%s", 10, 0
     title: db "Hello, world!", 0
-    error: db "Failed to load gl functions!", 10
+    error: db "Failed to load gl functions!", 10, 0
     imgpath: db "assets/test.png", 0
     pf: db "w: %d, h: %d, c: %d", 10, 0
     len equ $ - error
