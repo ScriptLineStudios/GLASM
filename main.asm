@@ -228,6 +228,10 @@ glgarbage:
     
     call create_tex
 
+    mov rdi, int_format
+    mov rsi, [bruh+noway.posx]
+    call printf
+
 loop:
     movd xmm0, [zero]
     movd xmm1, [r]
@@ -303,9 +307,17 @@ section .bss
     h: resb 4
     c: resb 4
     tex: resb 4
+    struc noway
+        .posx resb 4
+        .posy resb 4
+    endstruc
 
 section .data
     vertices: dq -0.5, -0.5, 0.0, 0.0,   0.5, 0.5, 1.0, 1.0,    0.5, -0.5, 1.0, 0.0,   -0.5, -0.5, 0.0, 0.0,   0.5, 0.5, 1.0, 1.0,  -0.5, 0.5, 0.0, 1.0
+    bruh: istruc noway
+        at noway.posx, dd 10
+        at noway.posy, dd 23
+    iend
 
 section .rodata
     int_format: db "%d", 10, 0
