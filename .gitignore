@@ -53,3 +53,6 @@ dkms.conf
 
 # Ignore main object file
 main
+
+# Ignore test files
+test.c

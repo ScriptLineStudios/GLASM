@@ -1,5 +1,5 @@
 main: main.asm
-	gcc -c stb.c -o stb.o -lm
+	gcc -c external/stb.c -o stb.o -lm
 	ar rcs libstb.a stb.o
 	rm *.o
 
