@@ -74,6 +74,19 @@ int main(void) {
     glLinkProgram(program);
     glUseProgram(program);
 
+    // mov rdi, GL_TEXTURE_2D
+    // mov rsi, 0
+    // mov rdx, GL_RGBA
+    // mov rcx, 1000
+    // mov r8, 1000
+    // mov r9, 0
+    // push GL_RGBA
+    // push GL_UNSIGNED_BYTE
+    // push image
+    // call [glad_glTexImage2D]
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1000, 1000, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
     while (!glfwWindowShouldClose(window)) {
         glClearColor(0.1, 0.1, 0.1, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
