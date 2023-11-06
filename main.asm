@@ -10,7 +10,7 @@ extern glfwInit, glfwTerminate, glfwCreateWindow, glfwSwapBuffers, glfwPollEvent
 
 extern printf, exit
 
-extern stbi_load
+extern stbi_load, stbi_image_free
 
 %define GL_ARRAY_BUFFER 34962
 %define GL_STATIC_DRAW 35044
@@ -161,6 +161,7 @@ glgarbage:
     mov rcx, c
     mov r8, 0
     call stbi_load
+    mov [image], rax
 
     mov rdi, pf
     mov rsi, [w]
