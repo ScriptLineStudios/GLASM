@@ -50,4 +50,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Ignore main object file
 main
