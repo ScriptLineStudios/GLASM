@@ -20,7 +20,32 @@ extern stbi_load, stbi_image_free
 %define GL_FRAGMENT_SHADER 35632
 %define GL_TEXTURE_2D 0x0DE1
 %define GL_RGBA 0x1908
+%define GL_RGB 6407
 %define GL_UNSIGNED_BYTE 0x1401
+
+%macro move_entity 2
+    mov r15, 0
+%%verts:
+    mov rax, r15
+    mov rcx, 4
+    mul rcx
+    mov rbx, rax
+
+    push __float32__(%1)
+    cvtss2sd xmm0, [rsp]
+
+    movsd xmm1, [vertices + (8 * (rbx + %2))] 
+    addsd xmm0, xmm1
+    pop rax
+
+    movsd [number], xmm0
+    movsd xmm0, [number]
+    movsd [vertices + (8 * (rbx + %2))], xmm0
+
+    inc r15
+    cmp r15, 6
+    jl %%verts
+%endmacro
 
 create_tex:
     push rbp
@@ -57,8 +82,8 @@ create_tex:
     mov rdi, GL_TEXTURE_2D
     mov rsi, 0
     mov rdx, GL_RGBA
-    mov rcx, 1000
-    mov r8, 1000
+    mov rcx, [w]
+    mov r8, [h]
     mov r9, 0
 
     sub rsp, 8
@@ -72,6 +97,9 @@ create_tex:
     ret
 
 %define GLFW_KEY_A 65
+%define GLFW_KEY_D 68
+%define GLFW_KEY_W 87
+%define GLFW_KEY_S 83
 
 main:
     push rbp
@@ -241,10 +269,30 @@ loop:
     mov rdi, [program]
     call [glad_glUseProgram]
 
+    mov r15, 0
+handle_entities:
+    ; mov rdi, entity_debug
+    ; mov rsi, r15
+    ; call printf
+
+    mov rdi, GL_ARRAY_BUFFER
+    mov rsi, [vbo]
+    call [glad_glBindBuffer]
+
+    mov rdi, GL_ARRAY_BUFFER
+    mov rsi, 192
+    mov rdx, vertices
+    mov rcx, GL_STATIC_DRAW
+    call [glad_glBufferData]
+
     mov rdi, 0x0004
     mov rsi, 0
     mov rdx, 6
     call [glad_glDrawArrays]
+
+    inc r15
+    cmp r15, [num_entities]
+    jl handle_entities
 
     mov rdi, [window]
     call glfwSwapBuffers
@@ -257,26 +305,38 @@ loop:
     je handle_a_end
 
 handle_a_start:
-    push __float32__(0.01)
-    cvtss2sd xmm0, [rsp]
-    movsd xmm1, [vertices] 
-    addsd xmm0, xmm1
-    pop rax
-
-    movsd [number], xmm0
-    movsd xmm0, [number]
-    movsd [vertices], xmm0
-
-    mov rdi, GL_ARRAY_BUFFER
-    mov rsi, [vbo]
-    call [glad_glBindBuffer]
-
-    mov rdi, GL_ARRAY_BUFFER
-    mov rsi, 192
-    mov rdx, vertices
-    mov rcx, GL_STATIC_DRAW
-    call [glad_glBufferData]
+    move_entity -0.01, 0
 handle_a_end:
+
+    mov rdi, [window]
+    mov rsi, GLFW_KEY_D
+    call glfwGetKey
+    cmp rax, 0
+    je handle_d_end
+
+handle_d_start:
+    move_entity 0.01, 0
+handle_d_end:
+
+    mov rdi, [window]
+    mov rsi, GLFW_KEY_W
+    call glfwGetKey
+    cmp rax, 0
+    je handle_w_end
+
+handle_w_start:
+    move_entity 0.01, 1
+handle_w_end:
+
+    mov rdi, [window]
+    mov rsi, GLFW_KEY_S
+    call glfwGetKey
+    cmp rax, 0
+    je handle_s_end
+
+handle_s_start:
+    move_entity -0.01, 1
+handle_s_end:
 
     mov rdi, [window]
     call glfwWindowShouldClose
@@ -305,16 +365,22 @@ section .bss
     tex: resb 4
 
 section .data
-    vertices: dq -0.5, -0.5, 0.0, 0.0,   0.5, 0.5, 1.0, 1.0,    0.5, -0.5, 1.0, 0.0,   -0.5, -0.5, 0.0, 0.0,   0.5, 0.5, 1.0, 1.0,  -0.5, 0.5, 0.0, 1.0
+    vertices: dq -0.05, -0.05, 0.0, 0.0,   0.05, 0.05, 1.0, 1.0,    0.05, -0.05, 1.0, 0.0, \
+                 -0.05, -0.05, 0.0, 0.0,   0.05, 0.05, 1.0, 1.0,   -0.05, 0.05, 0.0, 1.0
+
+    num_entities: db 2
+    entities: dq 0.0, 0.0 
 
 section .rodata
+    speed: dq 0.01
     int_format: db "%d", 10, 0
     float_format: db "%f", 10, 0
     pointer_format: db "%p", 10, 0
     string_format: db "%s", 10, 0
     title: db "Hello, world!", 0
     error: db "Failed to load gl functions!", 10
-    imgpath: db "assets/test.png", 0
+    imgpath: db "assets/ScriptLine_2.png", 0
+    entity_debug: db "handling entity: %d", 10, 0
     pf: db "w: %d, h: %d, c: %d", 10, 0
     len equ $ - error
     r: dd 0.1
